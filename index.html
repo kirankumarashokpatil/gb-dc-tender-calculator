@@ -3,62 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GB DC Tender Revenue Calculator</title>
+<title>DC Tender XAI | Premium</title>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0b0f15;
-    --panel: #131922;
-    --panel-border: #1e2736;
+    --bg: #05070a;
+    --panel: rgba(14, 20, 28, 0.6);
+    --panel-border: rgba(45, 226, 197, 0.15);
     --text: #e2e8f0;
-    --text-mut: #8b9bb4;
+    --text-mut: #687994;
     --accent: #2de2c5;
     --win: #46e08a;
-    --loss: #ff5468;
+    --loss: #ff3a59;
+    --glow: 0 0 20px rgba(45, 226, 197, 0.15);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
     padding: 40px 20px; min-height: 100vh;
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(45, 226, 197, 0.05), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(70, 224, 138, 0.04), transparent 25%);
   }
-  .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; }
+  .container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 340px; gap: 30px; }
   
-  .header { grid-column: 1 / -1; margin-bottom: 10px; border-bottom: 1px solid var(--panel-border); padding-bottom: 16px; }
-  h1 { font-family: 'Chakra Petch', sans-serif; font-size: 28px; color: var(--accent); letter-spacing: 0.05em; }
-  p.sub { color: var(--text-mut); font-size: 14px; margin-top: 6px; }
+  .header { grid-column: 1 / -1; margin-bottom: 10px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  h1 { font-family: 'Chakra Petch', sans-serif; font-size: 32px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; text-shadow: var(--glow); }
+  p.sub { color: var(--text-mut); font-size: 14px; margin-top: 6px; letter-spacing: 0.02em; }
 
-  .panel { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px; padding: 24px; }
-  .panel h2 { font-family: 'Chakra Petch', sans-serif; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; color: var(--text-mut); }
+  .glass-panel { 
+    background: var(--panel); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--panel-border); border-radius: 12px; padding: 30px; 
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  }
+  .glass-panel h2 { font-family: 'Chakra Petch', sans-serif; font-size: 14px; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 24px; color: var(--text-mut); display: flex; align-items: center; gap: 8px; }
+  .glass-panel h2::before { content:''; display:inline-block; width: 6px; height: 14px; background: var(--accent); border-radius: 2px; }
 
-  /* Capacity Input */
-  .cap-box { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; background: #080a0e; padding: 12px 16px; border: 1px solid var(--panel-border); border-radius: 6px; }
-  .cap-box label { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-  .cap-box input { background: transparent; border: none; border-bottom: 1px solid var(--accent); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 18px; width: 80px; text-align: center; outline: none; }
+  /* Capacity Slider */
+  .cap-box { margin-bottom: 40px; }
+  .cap-box label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-mut); display:flex; justify-content:space-between; margin-bottom: 12px;}
+  .cap-val { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 16px; }
   
-  /* EFA Grid */
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-mut); padding-bottom: 12px; border-bottom: 1px solid var(--panel-border); }
-  td { padding: 12px 0; border-bottom: 1px solid rgba(30, 39, 54, 0.5); font-size: 13px; }
-  td input { width: 60px; background: #080a0e; border: 1px solid var(--panel-border); color: var(--text); font-family: 'JetBrains Mono', monospace; padding: 4px 8px; border-radius: 4px; text-align: right; }
-  td input:focus { border-color: var(--accent); outline: none; }
+  input[type=range] { width: 100%; -webkit-appearance: none; background: transparent; margin: 8px 0; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; margin-top: -8px; box-shadow: 0 0 10px var(--accent); }
+  input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; cursor: pointer; background: rgba(255,255,255,0.1); border-radius: 1px; }
+
+  /* EFA Grid System */
+  .efa-grid { display: flex; flex-direction: column; gap: 16px; }
+  .efa-row { display: grid; grid-template-columns: 80px 100px 1fr 90px 70px; align-items: center; gap: 16px; padding: 12px 16px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.03); border-radius: 8px; transition: 0.3s; }
+  .efa-row:hover { border-color: rgba(45, 226, 197, 0.3); background: rgba(45, 226, 197, 0.02); }
   
-  .mono { font-family: 'JetBrains Mono', monospace; }
-  .status { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-  .s-win { background: rgba(70, 224, 138, 0.1); color: var(--win); border: 1px solid rgba(70, 224, 138, 0.3); }
-  .s-loss { background: rgba(255, 84, 104, 0.1); color: var(--loss); border: 1px solid rgba(255, 84, 104, 0.3); }
+  .efa-id { font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 14px; color: #fff; }
+  .efa-time { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-mut); }
+  
+  .bid-control { display: flex; flex-direction: column; gap: 6px; }
+  .bid-control input[type=range]::-webkit-slider-thumb { height: 14px; width: 14px; margin-top: -6px; }
+  .bid-vals { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  
+  .efa-clear { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-mut); text-align: right; }
+  
+  .status { font-family: 'Chakra Petch', sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 8px; border-radius: 4px; text-align: center; }
+  .s-win { background: rgba(70, 224, 138, 0.1); color: var(--win); box-shadow: 0 0 10px rgba(70,224,138,0.2); border: 1px solid rgba(70,224,138,0.3); }
+  .s-loss { background: rgba(255, 58, 89, 0.1); color: var(--loss); border: 1px solid rgba(255, 58, 89, 0.3); }
 
   /* Output Panel */
-  .metrics { display: flex; flex-direction: column; gap: 20px; }
-  .metric { background: #080a0e; border: 1px solid var(--panel-border); border-radius: 6px; padding: 16px; }
-  .m-label { font-size: 11px; color: var(--text-mut); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
-  .m-val { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: var(--accent); }
-  .m-sub { font-size: 12px; color: var(--text-mut); margin-top: 4px; }
+  .metrics { display: flex; flex-direction: column; gap: 24px; }
+  .metric { }
+  .m-label { font-size: 11px; color: var(--text-mut); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px; }
+  .m-val { font-family: 'JetBrains Mono', monospace; font-size: 38px; font-weight: 700; color: var(--accent); text-shadow: var(--glow); display: flex; align-items: baseline; gap: 6px;}
+  .m-val span { font-size: 16px; color: var(--text-mut); font-weight: 400; text-shadow: none; }
   
-  .summary { font-size: 13px; line-height: 1.5; color: var(--text-mut); margin-top: 10px; }
-  .summary b { color: var(--text); }
+  .m-sub { font-size: 12px; color: var(--text-mut); margin-top: 6px; line-height: 1.5; }
   
-  @media (max-width: 768px) {
+  /* Chart */
+  .chart-container { margin-top: 40px; height: 180px; display: flex; align-items: flex-end; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;}
+  .bar-wrapper { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px;}
+  .bar { width: 100%; background: linear-gradient(180deg, var(--accent) 0%, rgba(45,226,197,0.1) 100%); border-radius: 4px 4px 0 0; transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 -4px 12px rgba(45,226,197,0.2); }
+  .bar.lost { background: rgba(255, 58, 89, 0.1); box-shadow: none; }
+  .bar-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-mut); }
+
+  @media (max-width: 900px) {
     .container { grid-template-columns: 1fr; }
+    .efa-row { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
@@ -66,53 +92,42 @@
 
 <div class="container">
   <div class="header">
-    <h1>GB Dynamic Containment (DC) Tender Calculator</h1>
-    <p class="sub">Simulate NG-ESO auction clearing. Test your bidding strategy across all 6 EFA blocks using embedded historical clearing data.</p>
+    <h1>DC Tender Terminal</h1>
+    <p class="sub">High-Fidelity EFA Block Auction Simulator. Model Pay-As-Clear frequency response mechanics.</p>
   </div>
 
-  <div class="panel">
-    <h2>EFA Block Bidding Strategy</h2>
+  <div class="glass-panel">
+    <h2>Strategy Console</h2>
     
     <div class="cap-box">
-      <label>Asset Contracted Capacity (MW)</label>
-      <input type="number" id="capacity" value="50" step="1" min="1">
+      <label>Asset Contracted Capacity <span class="cap-val" id="cap-disp">50 MW</span></label>
+      <input type="range" id="capacity" value="50" min="10" max="250" step="10">
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>EFA Block</th>
-          <th>Time Window</th>
-          <th>Your Bid (£/MW/h)</th>
-          <th>NG-ESO Clearing</th>
-          <th>Status</th>
-          <th style="text-align:right">Rev/Day</th>
-        </tr>
-      </thead>
-      <tbody id="efa-body">
-        <!-- JS rendered -->
-      </tbody>
-    </table>
+    <div class="efa-grid" id="efa-grid">
+      <!-- JS rendered -->
+    </div>
   </div>
 
-  <div class="panel">
-    <h2>Projected Revenue Yields</h2>
+  <div class="glass-panel">
+    <h2>Yield Analytics</h2>
+    
     <div class="metrics">
       <div class="metric">
-        <div class="m-label">Daily Projected Revenue</div>
-        <div class="m-val" id="out-daily">£0</div>
-        <div class="m-sub">Assuming 100% availability for cleared blocks.</div>
+        <div class="m-label">Daily Revenue Capture</div>
+        <div class="m-val" id="out-daily">£0 <span>/ day</span></div>
       </div>
       
       <div class="metric">
-        <div class="m-label">Annualized Revenue</div>
-        <div class="m-val" id="out-annual" style="color: var(--win)">£0</div>
-        <div class="m-sub" id="out-annual-mw">£0 / MW / Yr</div>
+        <div class="m-label">Annualized Run-Rate</div>
+        <div class="m-val" style="color:var(--win); text-shadow:0 0 20px rgba(70,224,138,0.2)" id="out-annual">£0</div>
+        <div class="m-sub" id="out-annual-mw" style="font-family:'JetBrains Mono'; color:#fff">£0 / MW / Yr</div>
       </div>
     </div>
     
-    <div class="summary" id="summary-text">
-      Enter your bids to simulate clearing.
+    <div style="margin-top:40px; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-mut)">Revenue by Block</div>
+    <div class="chart-container" id="chart">
+      <!-- JS Rendered -->
     </div>
   </div>
 </div>
@@ -120,104 +135,107 @@
 <script>
   const $ = id => document.getElementById(id);
   
-  // Historical average clearing prices for DC High frequency response (Example dataset based on actual market structure)
   const efaData = [
-    { id: 1, name: 'EFA 1', time: '23:00 - 03:00', clearingPrice: 4.50 },
-    { id: 2, name: 'EFA 2', time: '03:00 - 07:00', clearingPrice: 3.20 },
-    { id: 3, name: 'EFA 3', time: '07:00 - 11:00', clearingPrice: 11.50 },
-    { id: 4, name: 'EFA 4', time: '11:00 - 15:00', clearingPrice: 8.40 },
-    { id: 5, name: 'EFA 5', time: '15:00 - 19:00', clearingPrice: 22.10 }, // Evening peak
-    { id: 6, name: 'EFA 6', time: '19:00 - 23:00', clearingPrice: 15.30 }
+    { id: 1, name: 'EFA 1', time: '23:00-03:00', clearingPrice: 4.50 },
+    { id: 2, name: 'EFA 2', time: '03:00-07:00', clearingPrice: 3.20 },
+    { id: 3, name: 'EFA 3', time: '07:00-11:00', clearingPrice: 11.50 },
+    { id: 4, name: 'EFA 4', time: '11:00-15:00', clearingPrice: 8.40 },
+    { id: 5, name: 'EFA 5', time: '15:00-19:00', clearingPrice: 22.10 },
+    { id: 6, name: 'EFA 6', time: '19:00-23:00', clearingPrice: 15.30 }
   ];
   
-  // Default user bids
   let userBids = [4.00, 4.00, 10.00, 8.00, 25.00, 12.00];
 
-  function renderTable() {
-    const tbody = $('efa-body');
-    tbody.innerHTML = '';
-    
-    const capacity = parseFloat($('capacity').value) || 0;
+  function renderGrid() {
+    const grid = $('efa-grid');
+    grid.innerHTML = '';
+    const chart = $('chart');
+    chart.innerHTML = '';
     
     efaData.forEach((efa, i) => {
-      const bid = userBids[i];
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><b>\${efa.name}</b></td>
-        <td class="mono" style="color:var(--text-mut)">\${efa.time}</td>
-        <td><input type="number" step="0.10" value="\${bid.toFixed(2)}" data-idx="\${i}" class="bid-input"></td>
-        <td class="mono">£\${efa.clearingPrice.toFixed(2)}</td>
-        <td><span class="status s-win">CLEARED</span></td>
-        <td class="mono" style="text-align:right; color:var(--win)">£0.00</td>
+      // Row
+      const row = document.createElement('div');
+      row.className = 'efa-row';
+      row.innerHTML = `
+        <div class="efa-id">\${efa.name}</div>
+        <div class="efa-time">\${efa.time}</div>
+        <div class="bid-control">
+          <input type="range" min="0" max="30" step="0.1" value="\${userBids[i]}" data-idx="\${i}" class="bid-input">
+          <div class="bid-vals">
+            <span style="color:var(--text)">Bid: £<span id="bid-disp-\${i}">\${userBids[i].toFixed(2)}</span></span>
+          </div>
+        </div>
+        <div class="efa-clear">Clr: £\${efa.clearingPrice.toFixed(2)}</div>
+        <div class="status" id="status-\${i}">--</div>
       `;
-      tbody.appendChild(tr);
+      grid.appendChild(row);
+
+      // Chart Bar
+      const wrapper = document.createElement('div');
+      wrapper.className = 'bar-wrapper';
+      wrapper.innerHTML = `
+        <div class="bar" id="bar-\${i}"></div>
+        <div class="bar-label">E\${efa.id}</div>
+      `;
+      chart.appendChild(wrapper);
     });
-    
-    // Listeners
+
     document.querySelectorAll('.bid-input').forEach(inp => {
       inp.addEventListener('input', (e) => {
-        const val = parseFloat(e.target.value);
-        if (!isNaN(val)) {
-          userBids[parseInt(e.target.dataset.idx)] = val;
-          calculateRevenue();
-        }
+        const idx = parseInt(e.target.dataset.idx);
+        userBids[idx] = parseFloat(e.target.value);
+        $('bid-disp-'+idx).innerText = userBids[idx].toFixed(2);
+        calculate();
       });
     });
   }
   
-  function calculateRevenue() {
-    const capacity = parseFloat($('capacity').value) || 0;
-    let totalDailyRev = 0;
-    let wonBlocks = 0;
+  $('capacity').addEventListener('input', (e) => {
+    $('cap-disp').innerText = e.target.value + ' MW';
+    calculate();
+  });
+
+  function calculate() {
+    const cap = parseFloat($('capacity').value) || 0;
+    let totalRev = 0;
     
-    const rows = $('efa-body').querySelectorAll('tr');
-    
-    efaData.forEach((efa, i) => {
-      const bid = userBids[i];
-      // Pay-as-clear market mechanics
-      const won = bid <= efa.clearingPrice;
-      const hours = 4; // Each EFA block is 4 hours
-      let rev = 0;
-      
-      const statusSpan = rows[i].querySelector('.status');
-      const revCell = rows[i].querySelector('td:last-child');
-      
-      if (won) {
-        rev = efa.clearingPrice * capacity * hours;
-        totalDailyRev += rev;
-        wonBlocks++;
-        statusSpan.className = 'status s-win';
-        statusSpan.innerText = 'CLEARED';
-        revCell.style.color = 'var(--win)';
-      } else {
-        statusSpan.className = 'status s-loss';
-        statusSpan.innerText = 'REJECTED';
-        revCell.style.color = 'var(--text-mut)';
-      }
-      revCell.innerText = '£' + rev.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+    let maxBlockRev = 0;
+    efaData.forEach(efa => {
+        let rev = efa.clearingPrice * cap * 4;
+        if(rev > maxBlockRev) maxBlockRev = rev;
     });
 
-    const annualRev = totalDailyRev * 365;
-    const annualPerMw = capacity > 0 ? annualRev / capacity : 0;
+    efaData.forEach((efa, i) => {
+      const bid = userBids[i];
+      const won = bid <= efa.clearingPrice;
+      const rev = won ? efa.clearingPrice * cap * 4 : 0;
+      
+      if(won) totalRev += rev;
+      
+      const st = $('status-'+i);
+      st.className = 'status ' + (won ? 's-win' : 's-loss');
+      st.innerText = won ? 'CLEARED' : 'REJECTED';
+
+      const bar = $('bar-'+i);
+      if(won) {
+        bar.className = 'bar';
+        const heightPct = Math.max(5, (rev / maxBlockRev) * 100);
+        bar.style.height = heightPct + '%';
+      } else {
+        bar.className = 'bar lost';
+        bar.style.height = '4px';
+      }
+    });
+
+    const annual = totalRev * 365;
     
-    $('out-daily').innerText = '£' + totalDailyRev.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
-    $('out-annual').innerText = '£' + annualRev.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
-    $('out-annual-mw').innerText = '£' + Math.round(annualPerMw).toLocaleString() + ' / MW / Yr';
-    
-    if (wonBlocks === 0) {
-      $('summary-text').innerHTML = `Your bids were too aggressive. You cleared <b>0 / 6</b> EFA blocks, yielding no revenue for the day.`;
-    } else if (wonBlocks === 6) {
-      $('summary-text').innerHTML = `You secured base-load DC! You cleared all <b>6 / 6</b> EFA blocks. At \${capacity} MW, this yields an annualized run-rate of £\${(annualPerMw/1000).toFixed(1)}k / MW / yr.`;
-    } else {
-      $('summary-text').innerHTML = `Strategic bidding: You cleared <b>\${wonBlocks} / 6</b> EFA blocks. You captured the highest value blocks while letting your asset rest (or trade N2EX) during low-value windows like EFA 2.`;
-    }
+    $('out-daily').innerHTML = '£' + totalRev.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0}) + ' <span>/ day</span>';
+    $('out-annual').innerHTML = '£' + (annual/1e6).toFixed(2) + '<span>m</span>';
+    $('out-annual-mw').innerText = '£' + (cap > 0 ? Math.round(annual/cap).toLocaleString() : 0) + ' / MW / Yr';
   }
 
-  $('capacity').addEventListener('input', calculateRevenue);
-
-  // Init
-  renderTable();
-  calculateRevenue();
+  renderGrid();
+  calculate();
 </script>
 </body>
 </html>
